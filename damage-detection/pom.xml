@@ -63,12 +63,16 @@
             <artifactId>onnxruntime-engine</artifactId>
         </dependency>
         <dependency>
-            <groupId>ai.djl.opencv</groupId>
-            <artifactId>opencv</artifactId>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-model-zoo</artifactId>
         </dependency>
         <dependency>
             <groupId>ai.djl</groupId>
-            <artifactId>basicdataset</artifactId>
+            <artifactId>model-zoo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
