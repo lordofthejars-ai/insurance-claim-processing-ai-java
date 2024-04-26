@@ -1,0 +1,26 @@
+To create the Ollama container, execute the following commands:
+
+[source, bash]
+----
+podman run -ti -p 11434:11434 ollama/ollama:0.1.32 # <1>
+
+podman exec -ti c912c91182eb ollama pull gemma:2b # <2>
+
+podman commit c912c91182eb quay.io/lordofthejars/ollama:0.1.32-gemma2b # <3> 
+----
+<1> Change the version of Ollama image with the version you require.
+<2> Change to your container id.
+<3> Change to your container id.
+
+To test it:
+
+[source, bash]
+----
+podman run -ti --rm -p 11434:11434 quay.io/lordofthejars/ollama:0.1.32-gemma2b
+
+curl http://localhost:11434/api/generate -d '{
+  "model": "gemma:2b",
+  "prompt": "Why is the sky blue?",
+  "stream":false
+}'
+----

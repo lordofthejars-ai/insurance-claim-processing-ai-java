@@ -1,0 +1,36 @@
+{@org.acme.model.Claim claim}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Insurance Report</title>
+</head>
+<body>
+<h1>Insurance Report {claim.name} - {claim.policyNumber}</h1>
+
+<div>Date: {claim.accidentDate}</div>
+{#if claim.typeOfDamage == "severe"}
+    <div>THIS IS AN URGENT REPORT</div>
+{/if}
+
+<h2>Summary</h2>
+
+<div>{claim.summary.raw}}</div>
+
+<ul>
+{#for plate in claim.involvedPlates}
+<li>{plate}</li>
+{/for}
+</ul>
+
+<div>
+<img src="data:image/png;base64, {image}" alt="Crash"/>
+</div>
+
+<h2>Full Claim</h2>
+<div>
+    {claim.fullText.raw}
+</div>
+
+</body>
+</html>
