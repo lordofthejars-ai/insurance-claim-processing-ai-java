@@ -1,0 +1,117 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app.quarkus.io/quarkus-version: 3.9.4
+    app.quarkus.io/commit-id: 9dc4d2c72da1e86ef71cc4a2195b32232f6ef661
+    app.quarkus.io/vcs-uri: https://github.com/lordofthejars/insurance-claim-processing-ai-java.git
+    app.quarkus.io/build-timestamp: 2024-05-07 - 12:29:15 +0000
+  labels:
+    app.kubernetes.io/name: insurance-claim-processing-web
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+  name: insurance-claim-processing-web
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: insurance-claim-processing-web
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: insurance-web-console
+  labels:
+    app: insurance-web
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: insurance-claim-processing-web
+    weight: 100
+  wildcardPolicy: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app.quarkus.io/quarkus-version: 3.9.4
+    app.quarkus.io/commit-id: 9dc4d2c72da1e86ef71cc4a2195b32232f6ef661
+    app.quarkus.io/vcs-uri: https://github.com/lordofthejars/insurance-claim-processing-ai-java.git
+    app.quarkus.io/build-timestamp: 2024-05-07 - 12:29:15 +0000
+  labels:
+    app.kubernetes.io/name: insurance-claim-processing-web
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+  name: insurance-claim-processing-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/version: 1.0.0-SNAPSHOT
+      app.kubernetes.io/name: insurance-claim-processing-web
+  template:
+    metadata:
+      annotations:
+        app.quarkus.io/quarkus-version: 3.9.4
+        app.quarkus.io/commit-id: 9dc4d2c72da1e86ef71cc4a2195b32232f6ef661
+        app.quarkus.io/vcs-uri: https://github.com/lordofthejars/insurance-claim-processing-ai-java.git
+        app.quarkus.io/build-timestamp: 2024-05-07 - 12:29:15 +0000
+      labels:
+        app.kubernetes.io/managed-by: quarkus
+        app.kubernetes.io/version: 1.0.0-SNAPSHOT
+        app.kubernetes.io/name: insurance-claim-processing-web
+    spec:
+      containers:
+        - env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          image: quay.io/lordofthejars/insurance-claim-processing-web:1.0.0-SNAPSHOT
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: insurance-claim-processing-web
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/started
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10

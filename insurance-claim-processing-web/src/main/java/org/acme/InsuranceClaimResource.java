@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.Response;
 import org.acme.model.Claim;
 import org.bson.types.ObjectId;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.PartType;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
@@ -21,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Random;
-import java.util.UUID;
+
 
 @Path("/insurance")
 public class InsuranceClaimResource {

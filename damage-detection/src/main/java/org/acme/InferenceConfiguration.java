@@ -22,7 +22,7 @@ import java.nio.file.Paths;
 @ApplicationScoped
 public class InferenceConfiguration {
 
-    @ConfigProperty(name = "fraud.model.path", defaultValue = "src/main/resources/accident-detect.onnx")
+    @ConfigProperty(name = "fraud.model.path", defaultValue = "src/main/jib/model/accident-detect.onnx")
     private String modelPath;
 
     @Produces
