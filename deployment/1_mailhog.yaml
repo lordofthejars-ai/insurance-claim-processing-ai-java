@@ -48,6 +48,8 @@ metadata:
 spec:
   port:
     targetPort: 8025
+  tls:
+    termination: edge
   to:
     kind: Service
     name: mailer

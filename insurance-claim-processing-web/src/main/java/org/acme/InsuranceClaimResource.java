@@ -1,11 +1,14 @@
 package org.acme;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.tuples.Tuple2;
 import io.smallrye.mutiny.tuples.Tuple3;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -43,6 +46,19 @@ public class InsuranceClaimResource {
     @Inject
     EmailService emailService;
 
+    @GET
+    @Path("/claim/{claimId}")
+    public Claim findClainById(@PathParam("claimId") String claimId) {
+        return Claim.findById(new ObjectId(claimId));
+    }
+
+    @GET
+    @Path("/claim/image/{claimId}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public byte[] getProcessedCrashImage(@PathParam("claimId") String claimId) {
+        return getProcessedImage(claimId);
+    }
+
     @POST
     @Path("/claim")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -67,19 +83,28 @@ public class InsuranceClaimResource {
 
         printClaim(mongoClaim);
 
-        return Response.ok().entity("Claim Processed with id %s".formatted(id)).build();
+        return Response.ok().entity(id).build();
     }
 
     private Tuple3<DetectedResult, String, ClaimParameters> useAI(String insuranceClaimReport, String id) {
-        Uni<DetectedResult> detectedResult = carDamageDetectorService.detectCarDamage(id);
-        Uni<String> summarize = summarizeService.summarize(insuranceClaimReport);
-        Uni<ClaimParameters> claimParams = claimExtractorService.extract(insuranceClaimReport);
+        Uni<DetectedResult> detectedResultUni = carDamageDetectorService.detectCarDamage(id);
+        Uni<ClaimParameters> claimParamsUni = claimExtractorService.extract(insuranceClaimReport);
 
-        Tuple3<DetectedResult, String, ClaimParameters> tuple = Uni.combine().all().unis(detectedResult, summarize, claimParams)
+        Tuple2<DetectedResult, ClaimParameters> tuple = Uni.combine().all().unis(detectedResultUni, claimParamsUni)
                 .asTuple()
                 .await()
                 .indefinitely();
-        return tuple;
+
+        final DetectedResult detectedResult = tuple.getItem1();
+
+        String summary = "Severe accident so no summary provided.";
+        if (!"severe".equals(detectedResult.clazz())) {
+            Uni<String> summarize = summarizeService.summarize(insuranceClaimReport);
+            summary = summarize.await().indefinitely();
+        }
+
+        return Tuple3.of(detectedResult, summary, tuple.getItem2());
+
     }
 
     @NotNull

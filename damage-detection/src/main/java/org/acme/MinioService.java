@@ -4,6 +4,7 @@ import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
 import io.minio.*;
 import io.minio.errors.*;
+import io.minio.messages.Item;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -29,7 +30,7 @@ public class MinioService {
     @ConfigProperty(name = "minio.processed-crash-images", defaultValue = "processed-crash-images")
     String processedCrashImagesBucketName;
 
-    void onStart(@Observes StartupEvent ev) {
+    void onStart(@Observes StartupEvent ev) throws Exception {
         this.deleteAndCreateBuckets();
     }
 
@@ -84,17 +85,18 @@ public class MinioService {
         }
     }
 
-    public void deleteAndCreateBuckets() {
+    public void deleteAndCreateBuckets() throws Exception {
         deleteAndCreateBucket(crashImagesBucketName);
         deleteAndCreateBucket(processedCrashImagesBucketName);
     }
 
-    private void deleteAndCreateBucket(String bucket) {
+    private void deleteAndCreateBucket(String bucket) throws Exception {
         try {
             boolean foundCrashImages =
                     minio.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
 
             if (foundCrashImages) {
+                deleteAll(bucket);
                 minio.removeBucket(RemoveBucketArgs.builder().bucket(bucket).build());
             }
 
@@ -109,5 +111,14 @@ public class MinioService {
             throw new IllegalArgumentException(e);
         }
     }
+
+    private void deleteAll(String bucketName) throws Exception{
+        Iterable<Result<Item>> results = minio.listObjects(ListObjectsArgs.builder().bucket(bucketName).build());
+        for (Result<Item> result : results) {
+          minio.removeObject(RemoveObjectArgs.builder()
+              .bucket(bucketName)
+              .object(result.get().objectName()).build());
+        }
+      }
 
 }

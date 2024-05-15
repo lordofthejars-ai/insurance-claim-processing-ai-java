@@ -1,5 +1,5 @@
 *
-!src/main/jib/model/*
+!src/main/jib/deployments/model/*
 !target/*-runner
 !target/*-runner.jar
 !target/lib/*
