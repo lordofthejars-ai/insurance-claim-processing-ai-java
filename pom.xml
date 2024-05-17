@@ -14,7 +14,7 @@
   <properties>
         
     <quarkus.platform.version>3.9.3</quarkus.platform.version>
-    <langchain4j.extension.version>0.11.1</langchain4j.extension.version>
+    <langchain4j.extension.version>999-SNAPSHOT</langchain4j.extension.version>
     <djl.version>0.27.0</djl.version>    
   </properties>
   

@@ -89,21 +89,24 @@ public class InsuranceClaimResource {
     private Tuple3<DetectedResult, String, ClaimParameters> useAI(String insuranceClaimReport, String id) {
         Uni<DetectedResult> detectedResultUni = carDamageDetectorService.detectCarDamage(id);
         Uni<ClaimParameters> claimParamsUni = claimExtractorService.extract(insuranceClaimReport);
+        Uni<String> summarize = summarizeService.summarize(insuranceClaimReport);
 
-        Tuple2<DetectedResult, ClaimParameters> tuple = Uni.combine().all().unis(detectedResultUni, claimParamsUni)
+        Tuple3<DetectedResult, String, ClaimParameters> tuple = Uni.combine().all().unis(detectedResultUni, summarize, claimParamsUni)
                 .asTuple()
                 .await()
                 .indefinitely();
 
-        final DetectedResult detectedResult = tuple.getItem1();
+        return tuple;
+
+        /*final DetectedResult detectedResult = tuple.getItem1();
 
         String summary = "Severe accident so no summary provided.";
         if (!"severe".equals(detectedResult.clazz())) {
             Uni<String> summarize = summarizeService.summarize(insuranceClaimReport);
             summary = summarize.await().indefinitely();
-        }
+        }*/
 
-        return Tuple3.of(detectedResult, summary, tuple.getItem2());
+        //return Tuple3.of(detectedResult, summary, tuple.getItem2());
 
     }
 
